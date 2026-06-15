@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 28mm 22mm 24mm 22mm;
+      @bottom-center {
+        content: "Página " counter(page) " de " counter(pages);
+        font-family: 'Inter', sans-serif;
+        font-size: 8pt;
+        color: #94a3b8;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1e293b;
+      font-size: 11pt;
+      line-height: 1.6;
+      padding: 32px 40px;
+    }
+    .header { border-bottom: 2px solid #3b82f6; padding-bottom: 16px; margin-bottom: 20px; }
+    .header h1 { font-size: 16pt; font-weight: 700; color: #0f172a; margin-bottom: 12px; word-wrap: break-word; overflow-wrap: break-word; }
+    .meta-table { width: 100%; border-collapse: collapse; }
+    .meta-table td { padding: 3px 8px; vertical-align: top; }
+    .meta-label { font-weight: 600; color: #64748b; width: 80px; white-space: nowrap; }
+    .meta-value { color: #334155; }
+    .importance-high { color: #dc2626; font-weight: 600; }
+    .body-content { margin: 24px 0; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; overflow-wrap: break-word; word-wrap: break-word; }
+    .body-content pre { white-space: pre-wrap; font-family: inherit; }
+    .body-content img { max-width: 100%; height: auto; }
+    .body-content table { max-width: 100%; }
+    .attachments { margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+    .attachments h3 { font-size: 11pt; font-weight: 600; color: #475569; margin-bottom: 8px; }
+    .att-list { list-style: none; padding: 0; }
+    .att-list li { padding: 4px 0; color: #334155; font-size: 10pt; }
+    .att-list li::before { content: "📎 "; }
+    .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 8pt; color: #94a3b8; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>{{ subject }}</h1>
+    <table class="meta-table">
+      <tr><td class="meta-label">De:</td><td class="meta-value">{{ sender }}</td></tr>
+      <tr><td class="meta-label">Para:</td><td class="meta-value">{{ recipients | join(', ') }}</td></tr>
+      {% if cc %}<tr><td class="meta-label">CC:</td><td class="meta-value">{{ cc | join(', ') }}</td></tr>{% endif %}
+      {% if bcc %}<tr><td class="meta-label">BCC:</td><td class="meta-value">{{ bcc | join(', ') }}</td></tr>{% endif %}
+      <tr><td class="meta-label">Data:</td><td class="meta-value">{{ date_formatted }}</td></tr>
+      {% if importance != 'normal' %}
+      <tr><td class="meta-label">Prioridade:</td><td class="meta-value {% if importance == 'high' %}importance-high{% endif %}">{{ importance | upper }}</td></tr>
+      {% endif %}
+    </table>
+  </div>
+  <div class="body-content">
+    {% if body_html %}{{ body_html }}{% elif body_text %}<pre>{{ body_text }}</pre>{% else %}<p style="color: #94a3b8; font-style: italic;">(Sem conteúdo)</p>{% endif %}
+  </div>
+  {% if attachments %}
+  <div class="attachments">
+    <h3>Anexos ({{ attachments | length }})</h3>
+    <ul class="att-list">
+      {% for att in attachments %}<li>{{ att.filename }} — {{ att.size | filesizeformat }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  <div class="footer">
+    Exportado por Kaixa em {{ export_date }} — Este documento é uma reprodução fiel do email original.
+  </div>
+</body>
+</html>

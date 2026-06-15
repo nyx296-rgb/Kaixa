@@ -1,0 +1,28 @@
+{# email_body_partial.html — Usado no batch export (sem <html>/<head>/<body>) #}
+<div class="header">
+  <h1>{{ subject }}</h1>
+  <table class="meta-table">
+    <tr><td class="meta-label">De:</td><td class="meta-value">{{ sender }}</td></tr>
+    <tr><td class="meta-label">Para:</td><td class="meta-value">{{ recipients | join(', ') }}</td></tr>
+    {% if cc %}<tr><td class="meta-label">CC:</td><td class="meta-value">{{ cc | join(', ') }}</td></tr>{% endif %}
+    {% if bcc %}<tr><td class="meta-label">BCC:</td><td class="meta-value">{{ bcc | join(', ') }}</td></tr>{% endif %}
+    <tr><td class="meta-label">Data:</td><td class="meta-value">{{ date_formatted }}</td></tr>
+    {% if importance != 'normal' %}
+    <tr><td class="meta-label">Prioridade:</td><td class="meta-value {% if importance == 'high' %}importance-high{% endif %}">{{ importance | upper }}</td></tr>
+    {% endif %}
+  </table>
+</div>
+<div class="body-content">
+  {% if body_html %}{{ body_html }}{% elif body_text %}<pre>{{ body_text }}</pre>{% else %}<p style="color: #94a3b8; font-style: italic;">(Sem conteúdo)</p>{% endif %}
+</div>
+{% if attachments %}
+<div class="attachments">
+  <h3>Anexos ({{ attachments | length }})</h3>
+  <ul class="att-list">
+    {% for att in attachments %}<li>{{ att.filename }} — {{ att.size | filesizeformat }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+<div class="footer">
+  Exportado por Kaixa em {{ export_date }} — Este documento é uma reprodução fiel do email original.
+</div>

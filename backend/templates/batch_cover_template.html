@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    @page {
+      size: A4;
+      margin: 28mm 22mm 24mm 22mm;
+      @bottom-center {
+        content: "Página " counter(page) " de " counter(pages);
+        font-family: 'Inter', sans-serif;
+        font-size: 8pt;
+        color: #94a3b8;
+      }
+    }
+
+    /* Cover page — no page number */
+    @page cover {
+      @bottom-center { content: none; }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1e293b;
+      font-size: 10pt;
+      line-height: 1.6;
+    }
+
+    /* ─── Cover page ──────────────────────────── */
+    .cover {
+      page: cover;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      page-break-after: always;
+    }
+
+    .cover-logo {
+      font-size: 36pt;
+      margin-bottom: 8px;
+    }
+
+    .cover-title {
+      font-size: 28pt;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .cover-subtitle {
+      font-size: 13pt;
+      font-weight: 500;
+      color: #3b82f6;
+      margin-bottom: 40px;
+    }
+
+    .cover-divider {
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 2px;
+      margin: 0 auto 40px auto;
+    }
+
+    .cover-stats {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .cover-stat {
+      text-align: center;
+    }
+
+    .cover-stat-value {
+      font-size: 24pt;
+      font-weight: 800;
+      color: #0f172a;
+      display: block;
+    }
+
+    .cover-stat-label {
+      font-size: 9pt;
+      font-weight: 500;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .cover-meta {
+      margin-top: 20px;
+      padding: 16px 32px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 9pt;
+      color: #64748b;
+    }
+
+    .cover-meta strong {
+      color: #334155;
+    }
+
+    .cover-footer {
+      margin-top: 60px;
+      font-size: 8pt;
+      color: #94a3b8;
+    }
+
+    /* ─── Index (Sumário) page ────────────────── */
+    .index-page {
+      page-break-after: always;
+    }
+
+    .index-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #3b82f6;
+    }
+
+    .index-header h2 {
+      font-size: 18pt;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .index-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+    }
+
+    .index-table thead th {
+      text-align: left;
+      padding: 8px 10px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      font-size: 7.5pt;
+      letter-spacing: 0.06em;
+      border-bottom: 2px solid #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .index-table thead th:first-child {
+      width: 32px;
+      text-align: center;
+    }
+
+    .index-table tbody tr {
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .index-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .index-table tbody td {
+      padding: 6px 10px;
+      vertical-align: top;
+    }
+
+    .index-num {
+      text-align: center;
+      font-weight: 600;
+      color: #3b82f6;
+    }
+
+    .index-subject {
+      font-weight: 500;
+      color: #0f172a;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .index-subject a {
+      color: #0f172a;
+      text-decoration: none;
+    }
+
+    .index-subject a:hover {
+      color: #3b82f6;
+    }
+
+    .index-sender {
+      color: #475569;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .index-date {
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    .index-att {
+      color: #94a3b8;
+      font-size: 8pt;
+      text-align: center;
+    }
+
+    .index-page-ref {
+      text-align: right;
+      color: #94a3b8;
+      font-size: 8pt;
+      white-space: nowrap;
+    }
+
+    /* ─── Separator between emails ────────────── */
+    .email-separator {
+      page-break-before: always;
+    }
+
+    .email-number-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #ffffff;
+      font-size: 9pt;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ COVER PAGE ═══ -->
+  <div class="cover">
+    <div class="cover-logo">📬</div>
+    <div class="cover-title">Relatório de Emails</div>
+    <div class="cover-subtitle">{{ mailbox_name or 'Kaixa' }}</div>
+    <div class="cover-divider"></div>
+
+    <div class="cover-stats">
+      <div class="cover-stat">
+        <span class="cover-stat-value">{{ total_emails }}</span>
+        <span class="cover-stat-label">Emails</span>
+      </div>
+      <div class="cover-stat">
+        <span class="cover-stat-value">{{ total_attachments }}</span>
+        <span class="cover-stat-label">Anexos</span>
+      </div>
+      {% if total_senders > 0 %}
+      <div class="cover-stat">
+        <span class="cover-stat-value">{{ total_senders }}</span>
+        <span class="cover-stat-label">Remetentes</span>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if date_range_start and date_range_end %}
+    <div class="cover-meta">
+      <strong>Período:</strong> {{ date_range_start }} — {{ date_range_end }}
+    </div>
+    {% endif %}
+
+    <div class="cover-footer">
+      Exportado por Kaixa em {{ export_date }}
+    </div>
+  </div>
+
+  <!-- ═══ INDEX PAGE ═══ -->
+  <div class="index-page">
+    <div class="index-header">
+      <h2>📋 Sumário</h2>
+    </div>
+
+    <table class="index-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Assunto</th>
+          <th>Remetente</th>
+          <th>Data</th>
+          <th>📎</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in index_items %}
+        <tr>
+          <td class="index-num">{{ item.number }}</td>
+          <td class="index-subject">
+            <a href="#email-{{ item.number }}">{{ item.subject }}</a>
+          </td>
+          <td class="index-sender">{{ item.sender_short }}</td>
+          <td class="index-date">{{ item.date }}</td>
+          <td class="index-att">{% if item.attachment_count > 0 %}{{ item.attachment_count }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>
