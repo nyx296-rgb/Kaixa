@@ -1,7 +1,7 @@
 // SpreadsheetViewer.tsx
 import React, { useEffect, useState, useRef } from 'react';
 import { Attachment } from '../../hooks/useAttachmentViewer';
-import api, { getAttachmentPreviewUrl } from '../../lib/api';
+import api, { getAttachmentPreviewUrl, getAttachmentUrl } from '../../lib/api';
 import { Loader2 } from 'lucide-react';
 import { useZoom } from '../../hooks/useZoom';
 import ZoomBar from '../ZoomBar';
@@ -83,7 +83,7 @@ const SpreadsheetViewer: React.FC<Props> = ({ attachment }) => {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
         <p className="text-sm text-red-400">{error}</p>
-        <a href={`/api/attachment/${attachment.id}`} download className="text-[12px] text-blue-400 hover:text-blue-300 underline">
+        <a href={getAttachmentUrl(attachment.id)} download className="text-[12px] text-blue-400 hover:text-blue-300 underline">
           Download {attachment.filename}
         </a>
       </div>

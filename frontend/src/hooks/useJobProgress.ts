@@ -15,7 +15,8 @@ export function useJobProgress(jobId: string | null) {
   useEffect(() => {
     if (!jobId) return;
 
-    const es = new EventSource(`/api/jobs/${jobId}/stream`);
+    const base = import.meta.env.VITE_API_URL || '/api';
+    const es = new EventSource(`${base}/jobs/${jobId}/stream`);
     esRef.current = es;
 
     es.addEventListener('progress', (e) => {

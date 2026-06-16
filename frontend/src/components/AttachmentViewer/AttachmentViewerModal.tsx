@@ -3,6 +3,7 @@ import React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useAttachmentViewer } from '../../hooks/useAttachmentViewer';
+import { getAttachmentUrl } from '../../lib/api';
 import ImageViewer from './ImageViewer';
 import PDFViewer from './PDFViewer';
 import TextViewer from './TextViewer';
@@ -47,7 +48,7 @@ const AttachmentViewerModal: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
         <p className="text-sm">Visualização não disponível para este tipo de arquivo</p>
         <a
-          href={`/api/attachment/${selectedAttachment.id}`}
+          href={getAttachmentUrl(selectedAttachment.id)}
           download={selectedAttachment.filename}
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
         >
@@ -83,7 +84,7 @@ const AttachmentViewerModal: React.FC = () => {
             <div className="flex items-center gap-2">
               {selectedAttachment && (
                 <a
-                  href={`/api/attachment/${selectedAttachment.id}`}
+                  href={getAttachmentUrl(selectedAttachment.id)}
                   download={selectedAttachment.filename}
                   className="p-1.5 rounded-md text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all duration-100"
                   title="Download"

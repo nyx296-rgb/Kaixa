@@ -1,7 +1,7 @@
 // OfficeViewer.tsx
 import React, { useEffect, useState } from 'react';
 import { Attachment } from '../../hooks/useAttachmentViewer';
-import api from '../../lib/api';
+import api, { getAttachmentUrl } from '../../lib/api';
 import { Loader2 } from 'lucide-react';
 
 interface OfficeViewerProps {
@@ -67,7 +67,7 @@ const OfficeViewer: React.FC<OfficeViewerProps> = ({ attachment }) => {
       <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
         <p className="text-sm text-red-400">{error}</p>
         <a
-          href={`/api/attachment/${attachment.id}`}
+          href={getAttachmentUrl(attachment.id)}
           download
           className="text-[12px] text-blue-400 hover:text-blue-300 underline"
         >
