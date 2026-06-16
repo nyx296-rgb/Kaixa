@@ -3,4 +3,4 @@ builder = "nixpacks"
 buildCommand = "npm ci && npm run build"
 
 [deploy]
-startCommand = "python3 server.py"
+startCommand = "node server.js"
