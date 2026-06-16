@@ -59,6 +59,9 @@ out/
 *.swp
 *.swo
 
+# Mbox files
+*.mbox
+
 # Project specific
 backend/uploads/
 backend/mailexplorer.db
