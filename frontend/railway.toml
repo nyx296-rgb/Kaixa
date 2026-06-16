@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm ci && npm run build && npm install -g serve"
+buildCommand = "npm ci && npm run build"
 
 [deploy]
-startCommand = "serve dist -l $PORT"
+startCommand = "python3 server.py"
