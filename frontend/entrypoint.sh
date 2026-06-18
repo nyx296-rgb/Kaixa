@@ -6,6 +6,13 @@ if [ -z "$BACKEND_URL" ]; then
   exit 1
 fi
 
+# Auto-add https:// if missing
+case "$BACKEND_URL" in
+  http://*|https://*) ;;
+  *) BACKEND_URL="https://$BACKEND_URL" ;;
+esac
+
+
 PORT="${PORT:-80}"
 
 echo "Starting nginx on port $PORT proxying to $BACKEND_URL"
