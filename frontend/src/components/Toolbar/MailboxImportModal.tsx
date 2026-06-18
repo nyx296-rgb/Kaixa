@@ -88,20 +88,6 @@ export default function MailboxImportModal() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
-    // Frontend validation - check file size (TUS supports up to 50GB)
-    const MAX_SIZE = 50 * 1024 * 1024 * 1024;
-
-    let totalSize = 0;
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      totalSize += file.size;
-    }
-
-    if (totalSize > MAX_SIZE) {
-      setError('O tamanho total excedeu o limite de 50GB.');
-      return;
-    }
 
     setError('');
     setIsSubmitting(true);

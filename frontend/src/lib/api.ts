@@ -130,14 +130,56 @@ export async function uploadMailbox(
   files: FileList | File[],
   onProgress?: (progressEvent: any) => void
 ): Promise<{ mailbox_id: string; job_id: string | null; format: string; needs_format?: boolean }> {
-  const f = files[0];
-  const THRESHOLD = 50 * 1024 * 1024; // 50MB — use TUS for files above this
+  const THRESHOLD = 50 * 1024 * 1024; // 50MB
 
-  if (f.size > THRESHOLD) {
-    return uploadMailboxTus(f, onProgress);
+  const largeFiles: File[] = [];
+  const smallFiles: File[] = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (file.size > THRESHOLD) {
+      largeFiles.push(file);
+    } else {
+      smallFiles.push(file);
+    }
   }
 
-  // Small file: keep original FormData upload
+  // If there's a single large file, use TUS
+  if (largeFiles.length === 1 && smallFiles.length === 0) {
+    return uploadMailboxTus(largeFiles[0], onProgress);
+  }
+
+  // If there are large files mixed with small files, upload large ones via TUS
+  // and small ones via POST, then return the last result
+  if (largeFiles.length > 0) {
+    let lastResult: any = null;
+
+    // Upload large files one by one via TUS
+    for (const file of largeFiles) {
+      lastResult = await uploadMailboxTus(file, (progressEvent: any) => {
+        if (onProgress) onProgress(progressEvent);
+      });
+    }
+
+    // Upload small files via POST if any
+    if (smallFiles.length > 0) {
+      const form = new FormData();
+      for (const file of smallFiles) {
+        const path = file.webkitRelativePath || file.name;
+        form.append('files', file, path);
+      }
+      const res = await api.post('/upload', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 0,
+        onUploadProgress: onProgress,
+      });
+      lastResult = res.data;
+    }
+
+    return lastResult!;
+  }
+
+  // All files are small: standard FormData upload
   const form = new FormData();
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
