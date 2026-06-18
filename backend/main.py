@@ -17,6 +17,7 @@ from fastapi.datastructures import UploadFile as FastAPIUploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 import bcrypt
 import jwt
