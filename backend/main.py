@@ -12,7 +12,7 @@ from typing import Optional
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 
-from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Query, Depends
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form, Query, Depends
 from fastapi.datastructures import UploadFile as FastAPIUploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
