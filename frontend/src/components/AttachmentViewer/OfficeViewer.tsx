@@ -26,11 +26,13 @@ const OfficeViewer: React.FC<OfficeViewerProps> = ({ attachment }) => {
 
         if (cancelled) return;
         const blob = response.data;
-        const fileContent = await blob.arrayBuffer();
 
-        const convertResponse = await api.post('/convert/office', {
-          file_content: Array.from(new Uint8Array(fileContent)),
-          mime_type: attachment.mime_type
+        const formData = new FormData();
+        formData.append('file', blob, attachment.filename);
+        formData.append('mime_type', attachment.mime_type);
+
+        const convertResponse = await api.post('/convert/office', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
 
         if (cancelled) return;

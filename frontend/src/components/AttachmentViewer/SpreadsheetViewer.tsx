@@ -43,11 +43,14 @@ const SpreadsheetViewer: React.FC<Props> = ({ attachment }) => {
           // XLSX: use backend converter
           const response = await api.get(`/attachment/${attachment.id}`, { responseType: 'blob' });
           if (cancelled) return;
-          const fileContent = await response.data.arrayBuffer();
+          const fileContent = response.data;
 
-          const convertResponse = await api.post('/convert/office', {
-            file_content: Array.from(new Uint8Array(fileContent)),
-            mime_type: attachment.mime_type,
+          const formData = new FormData();
+          formData.append('file', fileContent, attachment.filename);
+          formData.append('mime_type', attachment.mime_type);
+
+          const convertResponse = await api.post('/convert/office', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
           });
 
           if (cancelled) return;

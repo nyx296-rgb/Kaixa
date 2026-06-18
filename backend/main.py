@@ -907,26 +907,26 @@ async def get_parse_errors(mailbox_id: str, user=Depends(get_current_user)):
 # Office Document Conversion
 # ─────────────────────────────────────────────────
 
-from pydantic import BaseModel
 from services.office_converter import convert_office_to_html
 
 
-class ConvertOfficeRequest(BaseModel):
-    file_content: list  # List of bytes
-    mime_type: str
-
-
 @app.post("/convert/office")
-async def convert_office_document(request: ConvertOfficeRequest, user=Depends(get_current_user)):
-    """Convert DOCX/PPTX to HTML for in-app viewing."""
+async def convert_office_document(
+    file: UploadFile = File(...),
+    mime_type: str = Form(...),
+    user=Depends(get_current_user),
+):
+    """Convert DOCX/PPTX/XLSX to HTML for in-app viewing."""
     try:
-        file_bytes = bytes(request.file_content)
-        html = convert_office_to_html(file_bytes, request.mime_type)
-        
+        file_bytes = await file.read()
+        html = convert_office_to_html(file_bytes, mime_type)
+
         if html is None:
             raise HTTPException(status_code=400, detail="Conversion failed")
-        
+
         return {"html": html}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
