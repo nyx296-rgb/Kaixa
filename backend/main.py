@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Query, Depends
+from fastapi.datastructures import UploadFile as FastAPIUploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -351,8 +352,7 @@ async def upload_file(files: list[UploadFile] = File(...), user=Depends(get_curr
     total_size = 0
     saved_files = 0
     primary_name = ""
-
-    MAX_UPLOAD_SIZE = 500 * 1024 * 1024  # 500MB
+    MAX_UPLOAD_SIZE = 20 * 1024 * 1024 * 1024  # 20GB - supports large mbox files
 
     for file in files:
         if not file.filename:
@@ -369,7 +369,7 @@ async def upload_file(files: list[UploadFile] = File(...), user=Depends(get_curr
             while chunk := await file.read(1024 * 1024):  # 1MB chunks
                 total_size += len(chunk)
                 if total_size > MAX_UPLOAD_SIZE:
-                    raise HTTPException(413, "O tamanho total excedeu o limite de 500MB.")
+                    raise HTTPException(413, f"O tamanho total excedeu o limite de {MAX_UPLOAD_SIZE // (1024*1024*1024)}GB.")
                 f.write(chunk)
         
         saved_files += 1
