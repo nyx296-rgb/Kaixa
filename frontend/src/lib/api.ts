@@ -130,19 +130,127 @@ export async function uploadMailbox(
   files: FileList | File[],
   onProgress?: (progressEvent: any) => void
 ): Promise<{ mailbox_id: string; job_id: string | null; format: string; needs_format?: boolean }> {
+  const f = files[0];
+  const THRESHOLD = 50 * 1024 * 1024; // 50MB — use TUS for files above this
+
+  if (f.size > THRESHOLD) {
+    return uploadMailboxTus(f, onProgress);
+  }
+
+  // Small file: keep original FormData upload
   const form = new FormData();
   for (let i = 0; i < files.length; i++) {
-    const f = files[i];
-    // Use webkitRelativePath if available so backend can recreate folders
-    const path = f.webkitRelativePath || f.name;
-    form.append('files', f, path);
+    const file = files[i];
+    const path = file.webkitRelativePath || file.name;
+    form.append('files', file, path);
   }
   const res = await api.post('/upload', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
-    timeout: 0, // No timeout for uploads
+    timeout: 0,
     onUploadProgress: onProgress,
   });
   return res.data;
+}
+
+// ── TUS Resumable Upload ──
+
+async function uploadMailboxTus(
+  file: File,
+  onProgress?: (progressEvent: any) => void
+): Promise<{ mailbox_id: string; job_id: string | null; format: string; needs_format?: boolean }> {
+  const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+  const tusUrl = `${baseUrl}/upload-tus`;
+  const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
+
+  // 1. Create upload
+  const createRes = await fetch(tusUrl, {
+    method: 'POST',
+    headers: {
+      'Upload-Length': file.size.toString(),
+      'Upload-Metadata': `filename ${btoa(file.webkitRelativePath || file.name)}`,
+      'Tus-Resumable': '1.0.0',
+    },
+  });
+
+  if (!createRes.ok) {
+    throw new Error(`TUS create failed: ${createRes.status}`);
+  }
+
+  const location = createRes.headers.get('Location') || `${tusUrl}/${createRes.headers.get('Upload-Offset')}`;
+  const uploadId = location.split('/').pop()!;
+
+  // 2. Check existing offset (resume support)
+  let offset = 0;
+  try {
+    const headRes = await fetch(`${tusUrl}/${uploadId}`, { method: 'HEAD' });
+    if (headRes.ok) {
+      offset = parseInt(headRes.headers.get('Upload-Offset') || '0', 10);
+    }
+  } catch {}
+
+  // 3. Upload chunks
+  while (offset < file.size) {
+    const end = Math.min(offset + CHUNK_SIZE, file.size);
+    const chunk = file.slice(offset, end);
+
+    const patchRes = await fetch(`${tusUrl}/${uploadId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/offset+octet-stream',
+        'Upload-Offset': offset.toString(),
+        'Tus-Resumable': '1.0.0',
+      },
+      body: chunk,
+    });
+
+    if (!patchRes.ok) {
+      if (patchRes.status === 409) {
+        // Offset mismatch — re-read from server
+        const headRes2 = await fetch(`${tusUrl}/${uploadId}`, { method: 'HEAD' });
+        offset = parseInt(headRes2.headers.get('Upload-Offset') || '0', 10);
+        continue;
+      }
+      throw new Error(`TUS patch failed: ${patchRes.status}`);
+    }
+
+    offset = parseInt(patchRes.headers.get('Upload-Offset') || end.toString(), 10);
+
+    if (onProgress) {
+      onProgress({ loaded: offset, total: file.size });
+    }
+  }
+
+  // 4. Poll processing status
+  const uploadIdClean = location.split('/').pop()!;
+  let status = 'in_progress';
+  let attempts = 0;
+  const maxAttempts = 600; // 10 min max
+
+  while (status === 'in_progress' && attempts < maxAttempts) {
+    await new Promise(r => setTimeout(r, 2000));
+    attempts++;
+
+    const statusRes = await fetch(`${tusUrl}/${uploadIdClean}/status`);
+    if (statusRes.ok) {
+      const data = await statusRes.json();
+      status = data.status;
+
+      if (status === 'processed' && data.mailbox_id) {
+        return {
+          mailbox_id: data.mailbox_id,
+          job_id: null,
+          format: 'mbox',
+          needs_format: false,
+        };
+      }
+
+      if (status === 'error') {
+        throw new Error(data.error || 'Upload processing failed');
+      }
+    }
+  }
+
+  throw new Error('Upload processing timed out');
 }
 
 export async function listMailboxes(): Promise<Mailbox[]> {

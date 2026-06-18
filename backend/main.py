@@ -37,6 +37,7 @@ from models import (
 from services.format_detector import detect_format
 from services import job_manager
 from services.pdf_export import render_email_to_pdf, render_batch_to_pdf
+from services.tus_upload import setup_tus
 
 # ── Auth Config ──
 SECRET_KEY = os.getenv("JWT_SECRET", "mailexplorer-beta-secret-change-in-prod")
@@ -114,6 +115,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# TUS resumable upload support (>1GB files)
+setup_tus(app)
+
 # CORS — configurable via env, defaults to dev origins
 _cors_raw = os.getenv("CORS_ORIGINS", "")
 _cors_origins = [o.strip() for o in _cors_raw.split(",") if o.strip()] if _cors_raw else [
@@ -126,6 +130,10 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=[
+        "Location", "Upload-Offset", "Tus-Resumable", "Tus-Version",
+        "Tus-Extension", "Tus-Max-Size", "Upload-Expires", "Upload-Length",
+    ],
 )
 
 
