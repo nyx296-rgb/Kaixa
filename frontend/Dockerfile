@@ -12,16 +12,16 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
-# Install envsubst (included in gettext)
-RUN apk add --no-cache gettext
-
 # Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx config template
+# Copy nginx config as template
 COPY nginx.conf /etc/nginx/conf.d/default.conf.template
+
+# Copy and make entrypoint executable
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
 
-# Substitute only our custom variables, preserving nginx's own $variables
-CMD ["sh", "-c", "envsubst '${PORT} ${BACKEND_URL}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+ENTRYPOINT ["/entrypoint.sh"]
