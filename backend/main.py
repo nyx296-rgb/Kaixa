@@ -305,6 +305,28 @@ async def unread_count(user=Depends(get_current_user)):
 
 
 # ─────────────────────────────────────────────────
+# Bug Reports
+# ─────────────────────────────────────────────────
+
+class BugReportRequest(BaseModel):
+    description: str
+    steps: str = ""
+
+
+@app.post("/report-bug")
+async def report_bug(req: BugReportRequest, user=Depends(get_current_user)):
+    """Report a bug — creates a notification visible to superadmins."""
+    username = user.get("username", "unknown")
+    notif_id = str(uuid.uuid4())
+    title = f"Bug Report — {username}"
+    message = f"**Reportado por:** {username}\n\n**Descrição:**\n{req.description}"
+    if req.steps:
+        message += f"\n\n**Passos para reproduzir:**\n{req.steps}"
+    await queries.create_notification(notif_id, title, message, "warning")
+    return {"status": "ok"}
+
+
+# ─────────────────────────────────────────────────
 # Mailbox: Open by local path (Mode 1 — primary)
 # ─────────────────────────────────────────────────
 

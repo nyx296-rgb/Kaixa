@@ -530,4 +530,8 @@ export async function createNotification(title: string, message: string, type: s
   return res.data;
 }
 
+export async function reportBug(description: string, steps?: string): Promise<void> {
+  await api.post('/report-bug', { description, steps });
+}
+
 export default api;

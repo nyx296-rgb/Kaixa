@@ -13,6 +13,7 @@ import { useEmailStore } from './store/emailStore';
 import { useAuthStore } from './store/authStore';
 import { Keyboard, X } from 'lucide-react';
 import BetaBanner from './components/Layout/BetaBanner';
+import BugReportModal from './components/Layout/BugReportModal';
 import LGPDBanner from './components/Layout/LGPDBanner';
 import TopBar from './components/Layout/TopBar';
 
@@ -20,6 +21,7 @@ export default function App() {
   const { user, isLoading, loadFromStorage, isSuperadmin } = useAuthStore();
   const [showAdmin, setShowAdmin] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showBugReport, setShowBugReport] = useState(false);
   const showImportModal = useEmailStore((s) => s.showImportModal);
   const setShowImportModal = useEmailStore((s) => s.setShowImportModal);
   const showManagerModal = useEmailStore((s) => s.showManagerModal);
@@ -98,7 +100,7 @@ export default function App() {
 
   return (
     <>
-      {!isSuperadmin() && <BetaBanner />}
+      {!isSuperadmin() && <BetaBanner onReportBug={() => setShowBugReport(true)} />}
       <LGPDBanner />
 
       <div className="flex flex-col h-screen overflow-hidden">
@@ -122,6 +124,7 @@ export default function App() {
       {showManagerModal && <MailboxManagerModal />}
       {showTagManagerModal && <TagManagerModal />}
       <ParseErrorReportModal />
+      {showBugReport && <BugReportModal onClose={() => setShowBugReport(false)} />}
       {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
 
       {/* Shortcuts Modal */}
