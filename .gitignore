@@ -72,4 +72,3 @@ temp_venv/
 # Environment files
 .env
 .env.local
-generate_1gb_mbox.py
